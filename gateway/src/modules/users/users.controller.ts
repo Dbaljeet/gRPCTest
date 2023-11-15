@@ -1,23 +1,21 @@
-import { Controller, OnModuleInit, Inject, Get, Post } from '@nestjs/common'
+import { Controller, OnModuleInit, Inject, Post, Body } from '@nestjs/common'
 import { ClientGrpc } from '@nestjs/microservices'
-import { Observable } from 'rxjs'
-
-interface UserService {
-  createUser({}): Observable<any>
-}
+import { createUserDto } from './dto/user.dto'
+import { UsersServiceClient } from './users.pb'
 
 @Controller('users')
 export class UsersController implements OnModuleInit {
-  private userService: UserService
+  private userService: UsersServiceClient
 
   constructor(@Inject('USERS_PACKAGE') private client: ClientGrpc) {}
 
   onModuleInit() {
-    this.userService = this.client.getService<UserService>('UsersService')
+    this.userService =
+      this.client.getService<UsersServiceClient>('UsersService')
   }
 
   @Post()
-  async createUser() {
-    return this.userService.createUser({ email: 'dsad', password: '' })
+  async createUser(@Body() body: createUserDto) {
+    return this.userService.createUser(body)
   }
 }
